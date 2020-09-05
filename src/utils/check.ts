@@ -13,6 +13,6 @@ export const check: TCheck = action => {
     throw new Error(
       'Actions may not have an undefined "type" property. ' +
         'Have you misspelled a constant?'
-    )
+    );
   };
 };
