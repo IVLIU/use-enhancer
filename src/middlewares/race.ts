@@ -22,6 +22,6 @@ export const race: TMiddleware = () => next => async actions => {
     )
     await next(action);
   } catch(err) {
-    console.error('The error occurred in race middleware:', err)
+    console.error('The error occurred in race middleware:', err);
   }
 }

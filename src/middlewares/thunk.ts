@@ -9,6 +9,6 @@ export const thunk: TMiddleware = () => next => async action => {
     action = await action();
     await next(action);
   } catch(err) {
-    console.error('The error occurred in thunk middleware:', err)
+    console.error('The error occurred in thunk middleware:', err);
   }
 }

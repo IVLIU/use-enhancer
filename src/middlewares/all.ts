@@ -22,6 +22,6 @@ export const all: TMiddleware = () => next => async actions => {
     )
     await next(...actions);
   } catch(err) {
-    console.error('The error occurred in all middleware:', err)
+    console.error('The error occurred in all middleware:', err);
   }
 }
