@@ -42,9 +42,9 @@ const App = () => {
     () => next => async () => await next(),
     thunk,
     () => next => async () => {
-      console.log('m start.');
+      console.log(1);
       await next();
-      console.log('m end.');
+      console.log(2);
     },
   );
   React.useEffect(() => {

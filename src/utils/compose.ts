@@ -56,13 +56,6 @@ export const compose: TCompose = (callbacks, options = {}) => {
         }
       }
     }
-    if(tail!.resolve === null) {
-      const _c = tail!.callback;
-      tail!.callback = async action => {
-        await _c(action);
-        // await new Promise(_r => tail!.resolve = _r);
-      }
-    }
     if(!current) {
       current = head;
     }
@@ -82,6 +75,8 @@ export const compose: TCompose = (callbacks, options = {}) => {
       }
     } finally {
       isExecuting = false;
+      // todo to break the function and call it in effect.
+      // await new Promise(_r => tail!.resolve = _r);
     }
   }
   for(let _c of callbacks) {
@@ -103,13 +98,6 @@ export const compose: TCompose = (callbacks, options = {}) => {
         resolve: null,
         prev: null,
         next: null,
-      }
-      if(callbacks.length === 1) {
-        const _c = tail.callback;
-        tail.callback = async action => {
-          await _c(action);
-          // await new Promise(_r => tail!.resolve = _r);
-        }
       }
       continue;
     }
