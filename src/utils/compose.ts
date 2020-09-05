@@ -4,9 +4,11 @@ import { TNext } from './type';
 type TCompose = (callbacks: TCallback[], options?: Partial<TOptions>) => TLink;
 type TCallback = (next: TNext) => TLinkCallback;
 type TLinkCallback = (...args: any[]) => Promise<any>;
+type TResolve = (value?: unknown) => void;
 
 type TLink = {
   callback: TLinkCallback;
+  resolve: TResolve | null;
   pending: Promise<any> | null;
   prev: TLink;
   next: TLink;
@@ -59,11 +61,17 @@ export const compose: TCompose = (callbacks, options = {}) => {
     }
     current = current!.next;
     if(current) {
+      if(current === tail) {
+        const _c = current.callback;
+        current.callback = async action => {
+          await _c(action);
+        }
+      }
       if(isDispatchWithoutAction) {
         await current.callback();
         return;
       }
-      await current.callback(effect?.action);
+      await current.callback(effect!.action);
       return;
     }
     try {
@@ -91,6 +99,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
           return _c(next)(action)
         },
         pending: null,
+        resolve: null,
         prev: null,
         next: null,
       }
@@ -99,6 +108,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
     tail = tail!.next = {
       callback: _c(next),
       pending: null,
+      resolve: null,
       prev: tail,
       next: null,
     }

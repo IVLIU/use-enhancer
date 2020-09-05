@@ -38,7 +38,10 @@ const App = () => {
     state, 
     rawDispatch, 
     () => next => async () => await next(),
+    () => next => async () => await next(),
+    () => next => async () => await next(),
     thunk,
+    () => next => async () => await next(),
   );
   React.useEffect(() => {
     dispatch(async () => {
@@ -49,13 +52,28 @@ const App = () => {
     })
   }, [])
   return (
-    <div onClick={() => dispatch({
-      type: 'NORMAL_ACTION',
-      payload: {
-        value: 'normal'
-      }
-    })}>
+    <div>
       {state.value}
+      <div onClick={() => dispatch({
+        type: 'NORMAL_ACTION',
+        payload: {
+          value: 'normal'
+        }
+      })}>NORMAL</div>
+      {/* <div onClick={() => dispatch([
+        {
+          type: 'ALL1_ACTION',
+        payload: {
+          value: 'all1'
+        }
+        },
+        {
+          type: 'ALL2_ACTION',
+          payload: {
+            value: 'all2'
+          }
+        }
+      ])}>ALL</div> */}
     </div>
   );
 };

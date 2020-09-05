@@ -111,7 +111,8 @@ npm start
 
 ## 计划
 
-为了更好的执行副作用，我打算把中间件执行分为三个部分，分别是capture，target（已启用），bubble，类似于DOM事件流，其中capture阶段主要是真正dispatch执行前的操作，比如ajax请求等；target阶段是真正的dispatch阶段，不能打断；bubble阶段是dispatch之后的阶段，比如执行之后重新设置页面title，执行时机我打算放在useEffect执行，即页面绘制完毕后异步执行。这也是我采用双向链表的原因，可以方便的打断。
+1. 为了更好的执行副作用，我打算把中间件执行分为三个部分，分别是capture，target（已启用），bubble，类似于DOM事件流，其中capture阶段主要是真正dispatch执行前的操作，比如ajax请求等；target阶段是真正的dispatch阶段，不能打断；bubble阶段是dispatch之后的阶段，比如执行之后重新设置页面title，执行时机我打算放在useEffect执行，即页面绘制完毕后异步执行。这也是我采用双向链表的原因，可以方便的打断。
+2. 多个dispatch支持
 
 ## 最后
 希望大家可以多多提意见，多多star，多多pr。
