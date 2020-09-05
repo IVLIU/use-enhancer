@@ -17,4 +17,4 @@ export type TMiddlewareWithoutAction = <R extends ReducerWithoutAction<any>>(
 export type TMiddleware = <R extends Reducer<any, any>>(
   store: ReducerState<R>, 
   Dispatch: Dispatch<ReducerState<R>>
-) => (next: TNext) => (action: ReducerAction<R>) => Promise<void>;
+) => (next: TNext) => (action: ReducerAction<R> | ReducerAction<R>[]) => Promise<void>;

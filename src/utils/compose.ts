@@ -9,7 +9,6 @@ type TResolve = (value?: unknown) => void;
 type TLink = {
   callback: TLinkCallback;
   resolve: TResolve | null;
-  pending: Promise<any> | null;
   prev: TLink;
   next: TLink;
 } | null;
@@ -38,20 +37,22 @@ export const compose: TCompose = (callbacks, options = {}) => {
   let effect: TEffect = null;
   let isExecuting: boolean = false;
   let isDispatchWithoutAction: boolean = false;
-  const next: TNext = async derivedAction => {
+  const next: TNext = async (...derivedActions) => {
     if(isExecuting) {
       return;
     }
-    if(derivedAction) {
-      check(derivedAction);
-      if(!effect) {
-        effect = {
-          action: derivedAction,
-          next: null,
+    if(derivedActions.length > 0) {
+      for(const _d of derivedActions) {
+        check(_d);
+        if(!effect) {
+          effect = {
+            action: _d,
+            next: null,
+          }
+          continue;
         }
-      } else {
         effect = effect.next = {
-          action: derivedAction,
+          action: _d,
           next: null,
         }
       }
@@ -94,7 +95,6 @@ export const compose: TCompose = (callbacks, options = {}) => {
           }
           await _c(next)(action)
         },
-        pending: null,
         resolve: null,
         prev: null,
         next: null,
@@ -103,7 +103,6 @@ export const compose: TCompose = (callbacks, options = {}) => {
     }
     tail = tail!.next = {
       callback: _c(next),
-      pending: null,
       resolve: null,
       prev: tail,
       next: null,

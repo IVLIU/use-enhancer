@@ -4,15 +4,35 @@ import * as ReactDOM from 'react-dom';
 import useEnhancer from '../.';
 
 const thunk = () => next => async action => {
-  if(!action) {
+  if(!action || typeof action !== 'function') {
     await next();
     return;
   }
-  if(typeof action === 'function') {
-    action = await action();
-  }
+  action = await action();
   await next(action);
 };
+
+const all = () => next => async actions => {
+  if(!actions || !Array.isArray(actions)) {
+    await next();
+    return;
+  }
+  actions = await Promise.all(
+    actions.reduce((prev, current) => {
+      if(typeof current === 'function') {
+        return [
+          ...prev,
+          current(),
+        ]
+      }
+      return [
+        ...prev,
+        Promise.resolve(current),
+      ]
+    }, [] as Promise<typeof actions[0]>[]),
+  )
+  await next(...actions);
+}
 
 const reducer = (state, action) => {
   const { type, payload } = action;
@@ -27,6 +47,16 @@ const reducer = (state, action) => {
         ...state,
         ...payload,
       }
+    case 'ALL1_ACTION':
+      return {
+        ...state,
+        ...payload,
+      }
+      case 'ALL2_ACTION':
+        return {
+          ...state,
+          ...payload,
+        }
     default: 
       return state;
   }
@@ -41,11 +71,8 @@ const App = () => {
     () => next => async () => await next(),
     () => next => async () => await next(),
     thunk,
-    () => next => async () => {
-      console.log(1);
-      await next();
-      console.log(2);
-    },
+    () => next => async () => await next(),
+    all,
   );
   React.useEffect(() => {
     dispatch(async () => {
@@ -64,7 +91,7 @@ const App = () => {
           value: 'normal'
         }
       })}>NORMAL</div>
-      {/* <div onClick={() => dispatch([
+      <div onClick={() => dispatch([
         {
           type: 'ALL1_ACTION',
         payload: {
@@ -77,7 +104,7 @@ const App = () => {
             value: 'all2'
           }
         }
-      ])}>ALL</div> */}
+      ])}>ALL</div>
     </div>
   );
 };
