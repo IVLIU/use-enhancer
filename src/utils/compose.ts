@@ -56,11 +56,17 @@ export const compose: TCompose = (callbacks, options = {}) => {
         }
       }
     }
+    if(tail!.resolve === null) {
+      const _c = tail!.callback;
+      tail!.callback = async action => {
+        await _c(action);
+        // await new Promise(_r => tail!.resolve = _r);
+      }
+    }
     if(!current) {
       current = head;
     }
-    current = current!.next;
-    if(current) {
+    if(current = current!.next) {
       if(isDispatchWithoutAction) {
         await current.callback();
         return;
@@ -81,21 +87,29 @@ export const compose: TCompose = (callbacks, options = {}) => {
   for(let _c of callbacks) {
     if(!chain) {
       head = tail = chain = {
-        callback: action => {
+        callback: async action => {
           if(!action) {
             isDispatchWithoutAction = true;
-            return _c(next)();
+            await _c(next)();
+            return;
           }
           effect = {
             action,
             next: null,
           }
-          return _c(next)(action)
+          await _c(next)(action)
         },
         pending: null,
         resolve: null,
         prev: null,
         next: null,
+      }
+      if(callbacks.length === 1) {
+        const _c = tail.callback;
+        tail.callback = async action => {
+          await _c(action);
+          // await new Promise(_r => tail!.resolve = _r);
+        }
       }
       continue;
     }

@@ -41,7 +41,11 @@ const App = () => {
     () => next => async () => await next(),
     () => next => async () => await next(),
     thunk,
-    () => next => async () => await next(),
+    () => next => async () => {
+      console.log('m start.');
+      await next();
+      console.log('m end.');
+    },
   );
   React.useEffect(() => {
     dispatch(async () => {
