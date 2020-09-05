@@ -61,12 +61,6 @@ export const compose: TCompose = (callbacks, options = {}) => {
     }
     current = current!.next;
     if(current) {
-      if(current === tail) {
-        const _c = current.callback;
-        current.callback = async action => {
-          await _c(action);
-        }
-      }
       if(isDispatchWithoutAction) {
         await current.callback();
         return;
@@ -84,7 +78,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
       isExecuting = false;
     }
   }
-  callbacks.forEach(_c => {
+  for(let _c of callbacks) {
     if(!chain) {
       head = tail = chain = {
         callback: action => {
@@ -103,7 +97,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
         prev: null,
         next: null,
       }
-      return;
+      continue;
     }
     tail = tail!.next = {
       callback: _c(next),
@@ -112,6 +106,6 @@ export const compose: TCompose = (callbacks, options = {}) => {
       prev: tail,
       next: null,
     }
-  })
+  }
   return chain;
 }
