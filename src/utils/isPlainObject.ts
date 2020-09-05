@@ -4,9 +4,9 @@ export const isPlainObject: TIsPlainObject = obj => {
   if (typeof obj !== 'object' || obj === null) {
     return false;
   }
-  let proto = obj
+  let proto = obj;
   while(Object.getPrototypeOf(proto) !== null) {
-    proto = Object.getPrototypeOf(proto)
+    proto = Object.getPrototypeOf(proto);
   }
-  return Object.getPrototypeOf(obj) === proto
+  return Object.getPrototypeOf(obj) === proto;
 }
