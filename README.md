@@ -22,9 +22,9 @@ export type TMiddlewareWithoutAction = <R extends ReducerWithoutAction<any>>(
 export type TMiddleware = <R extends Reducer<any, any>>(
   store: ReducerState<R>, 
   Dispatch: Dispatch<ReducerState<R>>
-) => (next: TNext) => (action: ReducerAction<R>) => Promise<void>;
+) => (next: TNext) => (action: ReducerAction<R> | ReducerAction<R>[]) => Promise<void>;
 
-export type TNext = <R extends Reducer<any, any>>(action?: ReducerAction<R>) => Promise<void>;
+export type TNext = <R extends Reducer<any, any>>(actions?: ReducerAction<R>[]) => Promise<void>;
 ```
 
 它有两种形式，一种有action和一种无action版，你可通过闭包访问到store，dispatch（目前感觉是冗余参数，还没用到，也不推荐用），以及next函数。
