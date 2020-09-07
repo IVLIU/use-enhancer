@@ -62,21 +62,35 @@ const reducer = (state, action) => {
           ...state,
           ...payload,
         }
+      case 'EXTRA_ACTION':
+        return {
+          ...state,
+          ...payload,
+        };
     default: 
       return state;
   }
 };
 
 const App = () => {
-  const [state, rawDispatch] = React.useReducer(reducer, { value: 'initial', count: 0 });
+  const [state, rawDispatch] = React.useReducer(reducer, { value: 'initial', count: 0, extra: 0 });
   const dispatch = useEnhancer(
     state, 
     rawDispatch, 
     () => next => async () => await next(),
     () => next => async () => await next(),
-    () => next => async () => await next(),
+    (storeRef, dispatchRef) => next => async () => {
+      await next();
+      if(storeRef.current.extra !== 0) {
+        return;
+      }
+      dispatchRef.current({
+        type: 'EXTRA_ACTION',
+        payload: { extra: 1 }
+      });
+    },
     thunk,
-    storeRef => next => async () => {
+    (storeRef) => next => async () => {
       console.log('dispatch brefore', storeRef.current);
       await next();
       console.log('dispatch after', storeRef.current);

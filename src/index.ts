@@ -31,7 +31,7 @@ function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
   return (
     callbackRef.current ||
     (callbackRef.current = compose(
-      middlewares.map(_m => _m(storeRef, dispatch)),
+      middlewares.map(_m => _m(storeRef, callbackRef)),
       {
         onTarget: effect => {
           batch(() => {
