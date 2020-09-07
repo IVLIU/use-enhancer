@@ -77,7 +77,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
     } finally {
       isExecuting = false;
       // todo to break the function and call it in effect.
-      // await new Promise(_r => tail!.resolve = _r);
+      // await new Promise(_r => head!.resolve = _r);
     }
   };
   for (let _c of callbacks) {

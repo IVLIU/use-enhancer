@@ -57,13 +57,18 @@ const reducer = (state, action) => {
           ...state,
           ...payload,
         }
+      case 'ADD_ACTION':
+        return {
+          ...state,
+          ...payload,
+        }
     default: 
       return state;
   }
 };
 
 const App = () => {
-  const [state, rawDispatch] = React.useReducer(reducer, { value: 'initial' });
+  const [state, rawDispatch] = React.useReducer(reducer, { value: 'initial', count: 0 });
   const dispatch = useEnhancer(
     state, 
     rawDispatch, 
@@ -71,7 +76,11 @@ const App = () => {
     () => next => async () => await next(),
     () => next => async () => await next(),
     thunk,
-    () => next => async () => await next(),
+    store => next => async () => {
+      console.log(1, store);
+      await next();
+      console.log(2, store);
+    },
     all,
   );
   React.useEffect(() => {
@@ -84,7 +93,8 @@ const App = () => {
   }, [])
   return (
     <div>
-      {state.value}
+      <h2>{state.count}</h2>
+      <h2>{state.value}</h2>
       <div onClick={() => dispatch({
         type: 'NORMAL_ACTION',
         payload: {
@@ -105,6 +115,12 @@ const App = () => {
           }
         }
       ])}>ALL</div>
+      <div onClick={() => dispatch({
+        type: 'ADD_ACTION',
+        payload: {
+          count: state.count + 1,
+        }
+      })}>ADD</div>
     </div>
   );
 };
