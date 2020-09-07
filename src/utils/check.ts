@@ -1,4 +1,4 @@
-import { isPlainObject } from './isplainobject';
+import { isPlainObject } from './isPlainObject';
 
 type TCheck = (action: any) => never | void;
 
