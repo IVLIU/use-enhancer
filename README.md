@@ -16,12 +16,12 @@ yarn add @ivliu/use-enhancer # or npm install @ivliu/use-enhancer --save
 ```typescript
 export type TMiddlewareWithoutAction = <R extends ReducerWithoutAction<any>>(
   storeRef: MutableRefObject<ReducerStateWithoutAction<R>>, 
-  dispatch: DispatchWithoutAction
+  dispatch: MutableRefObject<DispatchWithoutAction>
 ) => (next: TNext) => () => Promise<void>;
 
 export type TMiddleware = <R extends Reducer<any, any>>(
   storeRef: MutableRefObject<ReducerState<R>>, 
-  Dispatch: Dispatch<ReducerState<R>>
+  dispatch: MutableRefObject<Dispatch<ReducerAction<R>>>
 ) => (next: TNext) => (action: ReducerAction<R> | ReducerAction<R>[]) => Promise<void>;
 
 export type TNext = <R extends Reducer<any, any>>(...actions?: ReducerAction<R>[]) => Promise<void>;
