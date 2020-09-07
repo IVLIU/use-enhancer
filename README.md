@@ -15,19 +15,19 @@ yarn add @ivliu/use-enhancer # or npm install @ivliu/use-enhancer --save
 ###  类型声明
 ```typescript
 export type TMiddlewareWithoutAction = <R extends ReducerWithoutAction<any>>(
-  store: ReducerStateWithoutAction<R>, 
+  storeRef: MutableRefObject<ReducerStateWithoutAction<R>>, 
   dispatch: DispatchWithoutAction
 ) => (next: TNext) => () => Promise<void>;
 
 export type TMiddleware = <R extends Reducer<any, any>>(
-  store: ReducerState<R>, 
+  storeRef: MutableRefObject<ReducerState<R>>, 
   Dispatch: Dispatch<ReducerState<R>>
 ) => (next: TNext) => (action: ReducerAction<R> | ReducerAction<R>[]) => Promise<void>;
 
 export type TNext = <R extends Reducer<any, any>>(...actions?: ReducerAction<R>[]) => Promise<void>;
 ```
 
-它有两种形式，一种有action和一种无action版，你可通过闭包访问到store，dispatch（目前感觉是冗余参数，还没用到，也不推荐用），以及next函数。
+它有两种形式，一种有action和一种无action版，你可通过闭包访问到storeRef（通过storeRef.current访问store），dispatch（没有经过中间件包裹的dispatch，一般可以用来做副作用的dispatch，后续有考虑换成经过包裹的dispatch），以及next函数。
 
 ```typescript
 import { TMiddleware } from './type';
