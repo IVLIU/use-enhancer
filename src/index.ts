@@ -23,31 +23,30 @@ function useEnhancer<R extends Reducer<any, any>>(
 ): Dispatch<ReducerState<R>>;
 function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
   const callbackRef = useRef<typeof dispatch>();
-  if (callbackRef.current) {
-    return callbackRef.current;
-  }
+  const storeRef = useRef<typeof store>();
   if (middlewares.length === 0) {
-    callbackRef.current = dispatch;
-    return callbackRef.current;
+    return callbackRef.current || (callbackRef.current = dispatch);
   }
-  const { callback } = compose(
-    middlewares.map(_m => _m(store, dispatch)),
-    {
-      onTarget: effect => {
-        batch(() => {
-          while (effect) {
-            const { action, next } = effect;
-            if (isPlainObject(action)) {
-              dispatch(action);
+  storeRef.current = store;
+  return (
+    callbackRef.current ||
+    (callbackRef.current = compose(
+      middlewares.map(_m => _m(storeRef, dispatch)),
+      {
+        onTarget: effect => {
+          batch(() => {
+            while (effect) {
+              const { action, next } = effect;
+              if (isPlainObject(action)) {
+                dispatch(action);
+              }
+              effect = next;
             }
-            effect = next;
-          }
-        });
-      },
-    }
-  )!;
-  callbackRef.current = callback;
-  return callbackRef.current;
+          });
+        },
+      }
+    )!.callback)
+  );
 }
 
 export default useEnhancer;

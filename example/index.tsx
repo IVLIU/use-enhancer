@@ -76,10 +76,10 @@ const App = () => {
     () => next => async () => await next(),
     () => next => async () => await next(),
     thunk,
-    store => next => async () => {
-      console.log(1, store);
+    storeRef => next => async () => {
+      console.log('dispatch brefore', storeRef.current);
       await next();
-      console.log(2, store);
+      console.log('dispatch after', storeRef.current);
     },
     all,
   );
