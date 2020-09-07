@@ -1,7 +1,7 @@
-import { 
+import {
   ReducerWithoutAction,
-  ReducerStateWithoutAction, 
-  DispatchWithoutAction, 
+  ReducerStateWithoutAction,
+  DispatchWithoutAction,
   Reducer,
   ReducerState,
   Dispatch,
@@ -11,43 +11,39 @@ import { unstable_batchedUpdates as batch } from 'react-dom';
 import { compose, isPlainObject } from './utils';
 import { TMiddlewareWithoutAction, TMiddleware } from './type';
 
-function useEnhancer<
-  R extends ReducerWithoutAction<any>
->(
-  store: ReducerStateWithoutAction<R>, 
+function useEnhancer<R extends ReducerWithoutAction<any>>(
+  store: ReducerStateWithoutAction<R>,
   dispatch: DispatchWithoutAction,
   ...middlewares: TMiddlewareWithoutAction[]
 ): DispatchWithoutAction;
-function useEnhancer<
-  R extends Reducer<any, any>
->(
-  store: ReducerState<R>, 
+function useEnhancer<R extends Reducer<any, any>>(
+  store: ReducerState<R>,
   dispatch: Dispatch<ReducerState<R>>,
   ...middlewares: TMiddleware[]
-): Dispatch<ReducerState<R>>; 
+): Dispatch<ReducerState<R>>;
 function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
   const callbackRef = useRef<typeof dispatch>();
-  if(callbackRef.current) {
+  if (callbackRef.current) {
     return callbackRef.current;
   }
-  if(middlewares.length === 0) {
+  if (middlewares.length === 0) {
     callbackRef.current = dispatch;
     return callbackRef.current;
   }
   let { callback } = compose(
-    middlewares.map(_m => _m(store, dispatch)), 
+    middlewares.map(_m => _m(store, dispatch)),
     {
       onTarget: effect => {
         batch(() => {
-          while(effect) {
+          while (effect) {
             const { action, next } = effect;
-            if(isPlainObject(action)) {
+            if (isPlainObject(action)) {
               dispatch(action);
             }
             effect = next;
           }
-        })
-      }
+        });
+      },
     }
   )!;
   callbackRef.current = callback;

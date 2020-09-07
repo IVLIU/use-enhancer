@@ -27,7 +27,7 @@ type TOptions = {
   onCapture: () => void;
   onTarget: (effect: TEffect) => void;
   onBubble: () => void;
-}
+};
 
 export const compose: TCompose = (callbacks, options = {}) => {
   let head: TLink = null;
@@ -38,30 +38,30 @@ export const compose: TCompose = (callbacks, options = {}) => {
   let isExecuting: boolean = false;
   let isDispatchWithoutAction: boolean = false;
   const next: TNext = async (...derivedActions) => {
-    if(isExecuting) {
+    if (isExecuting) {
       return;
     }
-    if(derivedActions.length > 0) {
-      for(const _d of derivedActions) {
+    if (derivedActions.length > 0) {
+      for (const _d of derivedActions) {
         check(_d);
-        if(!effect) {
+        if (!effect) {
           effect = {
             action: _d,
             next: null,
-          }
+          };
           continue;
         }
         effect = effect.next = {
           action: _d,
           next: null,
-        }
+        };
       }
     }
-    if(!current) {
+    if (!current) {
       current = head;
     }
-    if(current = current!.next) {
-      if(isDispatchWithoutAction) {
+    if ((current = current!.next)) {
+      if (isDispatchWithoutAction) {
         await current.callback();
         return;
       }
@@ -71,7 +71,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
     try {
       isExecuting = true;
       const { onTarget } = options;
-      if(onTarget) {
+      if (onTarget) {
         onTarget(effect);
       }
     } finally {
@@ -79,12 +79,12 @@ export const compose: TCompose = (callbacks, options = {}) => {
       // todo to break the function and call it in effect.
       // await new Promise(_r => tail!.resolve = _r);
     }
-  }
-  for(let _c of callbacks) {
-    if(!chain) {
+  };
+  for (let _c of callbacks) {
+    if (!chain) {
       head = tail = chain = {
         callback: async action => {
-          if(!action) {
+          if (!action) {
             isDispatchWithoutAction = true;
             await _c(next)();
             return;
@@ -92,13 +92,13 @@ export const compose: TCompose = (callbacks, options = {}) => {
           effect = {
             action,
             next: null,
-          }
-          await _c(next)(action)
+          };
+          await _c(next)(action);
         },
         resolve: null,
         prev: null,
         next: null,
-      }
+      };
       continue;
     }
     tail = tail!.next = {
@@ -106,7 +106,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
       resolve: null,
       prev: tail,
       next: null,
-    }
+    };
   }
   return chain;
-}
+};
