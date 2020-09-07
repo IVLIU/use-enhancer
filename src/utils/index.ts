@@ -1,4 +1,4 @@
 export { compose } from './compose';
-export { isPlainObject } from './isplainObject';
+export { isPlainObject } from './isPlainObject';
 export { check } from './check';
 export * from './type';
