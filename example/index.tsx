@@ -84,13 +84,14 @@ const App = () => {
       if(storeRef.current.extra !== 0) {
         return;
       }
+      // 我不知道为啥，但是需要as any下，否则会报类型不匹配的错误
       dispatchRef.current({
         type: 'EXTRA_ACTION',
         payload: { extra: 1 }
-      });
+      } as any);
     },
     thunk,
-    (storeRef) => next => async () => {
+    storeRef => next => async () => {
       console.log('dispatch brefore', storeRef.current);
       await next();
       console.log('dispatch after', storeRef.current);

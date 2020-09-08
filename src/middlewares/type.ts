@@ -1,11 +1,11 @@
 import {
-  ReducerState,
   Dispatch,
   Reducer,
   ReducerStateWithoutAction,
   DispatchWithoutAction,
   ReducerWithoutAction,
   ReducerAction,
+  ReducerState,
   MutableRefObject,
 } from 'react';
 import { TNext } from '../utils';
