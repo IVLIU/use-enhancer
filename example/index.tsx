@@ -12,25 +12,19 @@ const thunk = () => next => async action => {
   await next(action);
 };
 
-const all = () => next => async actions => {
-  if(!actions || !Array.isArray(actions)) {
+const all = storeRef => next => async actions => {
+  if (!actions || !Array.isArray(actions)) {
     await next();
     return;
   }
   actions = await Promise.all(
-    actions.reduce((prev, current) => {
-      if(typeof current === 'function') {
-        return [
-          ...prev,
-          current(),
-        ]
+    actions.reduce<Promise<typeof actions[0]>[]>((prev, current) => {
+      if (typeof current === 'function') {
+        return [...prev, current(storeRef.current)];
       }
-      return [
-        ...prev,
-        Promise.resolve(current),
-      ]
-    }, [] as Promise<typeof actions[0]>[]),
-  )
+      return [...prev, Promise.resolve(current)];
+    }, [])
+  );
   await next(...actions);
 }
 
@@ -38,35 +32,15 @@ const reducer = (state, action) => {
   const { type, payload } = action;
   switch(type) {
     case 'ASYNC_ACTION':
-      return {
-        ...state,
-        ...payload,
-      }
     case 'NORMAL_ACTION':
-      return {
-        ...state,
-        ...payload,
-      }
     case 'ALL1_ACTION':
+    case 'ALL2_ACTION':
+    case 'ADD_ACTION':
+    case 'EXTRA_ACTION':
       return {
         ...state,
         ...payload,
-      }
-      case 'ALL2_ACTION':
-        return {
-          ...state,
-          ...payload,
-        }
-      case 'ADD_ACTION':
-        return {
-          ...state,
-          ...payload,
-        }
-      case 'EXTRA_ACTION':
-        return {
-          ...state,
-          ...payload,
-        };
+      };
     default: 
       return state;
   }
@@ -91,11 +65,7 @@ const App = () => {
       } as any);
     },
     thunk,
-    storeRef => next => async () => {
-      console.log('dispatch brefore', storeRef.current);
-      await next();
-      console.log('dispatch after', storeRef.current);
-    },
+    () => next => async () => await next(),
     all,
   );
   React.useEffect(() => {
@@ -119,9 +89,9 @@ const App = () => {
       <div onClick={() => dispatch([
         {
           type: 'ALL1_ACTION',
-        payload: {
-          value: 'all1'
-        }
+          payload: {
+            value: 'all1'
+          }
         },
         {
           type: 'ALL2_ACTION',

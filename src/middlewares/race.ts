@@ -1,6 +1,6 @@
 import { TMiddleware } from './type';
 
-export const race: TMiddleware = () => next => async actions => {
+export const race: TMiddleware = storeRef => next => async actions => {
   try {
     if (!actions || !Array.isArray(actions)) {
       await next();
@@ -9,7 +9,7 @@ export const race: TMiddleware = () => next => async actions => {
     const action = await Promise.race(
       actions.reduce<Promise<typeof actions[0]>[]>((prev, current) => {
         if (typeof current === 'function') {
-          return [...prev, current()];
+          return [...prev, current(storeRef.current)];
         }
         return [...prev, Promise.resolve(current)];
       }, [])

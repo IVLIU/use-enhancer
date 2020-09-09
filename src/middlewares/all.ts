@@ -1,6 +1,6 @@
 import { TMiddleware } from './type';
 
-export const all: TMiddleware = () => next => async actions => {
+export const all: TMiddleware = storeRef => next => async actions => {
   try {
     if (!actions || !Array.isArray(actions)) {
       await next();
@@ -9,7 +9,7 @@ export const all: TMiddleware = () => next => async actions => {
     actions = await Promise.all(
       actions.reduce<Promise<typeof actions[0]>[]>((prev, current) => {
         if (typeof current === 'function') {
-          return [...prev, current()];
+          return [...prev, current(storeRef.current)];
         }
         return [...prev, Promise.resolve(current)];
       }, [])

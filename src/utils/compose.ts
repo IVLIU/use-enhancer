@@ -34,9 +34,11 @@ export const compose: TCompose = (callbacks, options = {}) => {
   let tail: TLink = null;
   let chain: TLink = null;
   let current: TLink = null;
-  let effect: TEffect = null;
+  let effects: TEffect = null;
+  let currentEffect: TEffect = null;
   let isExecuting: boolean = false;
   let isDispatchWithoutAction: boolean = false;
+  // let isAutoResolve: boolean = true;
   const next: TNext = async (...derivedActions) => {
     if (isExecuting) {
       return;
@@ -44,14 +46,14 @@ export const compose: TCompose = (callbacks, options = {}) => {
     if (derivedActions.length > 0) {
       for (const _d of derivedActions) {
         check(_d);
-        if (!effect) {
-          effect = {
+        if (!effects) {
+          effects = currentEffect = {
             action: _d,
             next: null,
           };
           continue;
         }
-        effect = effect.next = {
+        currentEffect = currentEffect!.next = {
           action: _d,
           next: null,
         };
@@ -65,14 +67,14 @@ export const compose: TCompose = (callbacks, options = {}) => {
         await current.callback();
         return;
       }
-      await current.callback(effect!.action);
+      await current.callback(effects!.action);
       return;
     }
     try {
       isExecuting = true;
       const { onTarget } = options;
       if (onTarget) {
-        onTarget(effect);
+        onTarget(effects);
       }
     } finally {
       isExecuting = false;
@@ -84,21 +86,37 @@ export const compose: TCompose = (callbacks, options = {}) => {
     if (!chain) {
       head = tail = chain = {
         callback: async action => {
+          const { onCapture, onBubble } = options;
+          if (onCapture) {
+            onCapture();
+          }
           if (!action) {
             isDispatchWithoutAction = true;
             await _c(next)();
+            if (onBubble) {
+              onBubble();
+            }
             return;
           }
-          effect = {
+          effects = currentEffect = {
             action,
             next: null,
           };
           await _c(next)(action);
+          if (onBubble) {
+            onBubble();
+          }
         },
         resolve: null,
         prev: null,
         next: null,
       };
+      // Object.defineProperty(head, 'resolve', {
+      //   get: function() {
+      //     isAutoResolve = false;
+      //     return this.resolve;
+      //   },
+      // });
       continue;
     }
     tail = tail!.next = {
