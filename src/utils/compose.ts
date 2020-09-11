@@ -35,10 +35,24 @@ export const compose: TCompose = (callbacks, options = {}) => {
   let chain: TLink = null;
   let current: TLink = null;
   let effects: TEffect = null;
+  // let nextTickEffects: TEffect = null;
   let currentEffect: TEffect = null;
   let isExecuting: boolean = false;
   let isDispatchWithoutAction: boolean = false;
   // let isAutoResolve: boolean = true;
+  const setEffects: (action: any) => void = action => {
+    if (!effects) {
+      effects = currentEffect = {
+        action,
+        next: null,
+      };
+      return;
+    }
+    currentEffect = currentEffect!.next = {
+      action,
+      next: null,
+    };
+  };
   const next: TNext = async (...derivedActions) => {
     if (isExecuting) {
       return;
@@ -46,24 +60,14 @@ export const compose: TCompose = (callbacks, options = {}) => {
     if (derivedActions.length > 0) {
       for (const _d of derivedActions) {
         check(_d);
-        if (!effects) {
-          effects = currentEffect = {
-            action: _d,
-            next: null,
-          };
-          continue;
-        }
-        currentEffect = currentEffect!.next = {
-          action: _d,
-          next: null,
-        };
+        setEffects(_d);
       }
     }
     if (!current) {
       current = head;
     }
     if ((current = current!.next)) {
-      if (isDispatchWithoutAction) {
+      if (isDispatchWithoutAction || !effects) {
         await current.callback();
         return;
       }
@@ -77,9 +81,13 @@ export const compose: TCompose = (callbacks, options = {}) => {
         onTarget(effects);
       }
     } finally {
-      isExecuting = false;
-      // todo to break the function and call it in effect.
-      // await new Promise(_r => head!.resolve = _r);
+      // todo 后期换为promise，兼容性有问题
+      queueMicrotask(() => {
+        isExecuting = false;
+        effects = null;
+        // todo to break the function and call it in effect.
+        // await new Promise(_r => head!.resolve = _r);
+      });
     }
   };
   for (let _c of callbacks) {
@@ -87,7 +95,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
       head = tail = chain = {
         callback: async action => {
           const { onCapture, onBubble } = options;
-          if (onCapture) {
+          if (!effects && onCapture) {
             onCapture();
           }
           if (!action) {
@@ -98,12 +106,9 @@ export const compose: TCompose = (callbacks, options = {}) => {
             }
             return;
           }
-          effects = currentEffect = {
-            action,
-            next: null,
-          };
+          setEffects(action);
           await _c(next)(action);
-          if (onBubble) {
+          if (!effects && onBubble) {
             onBubble();
           }
         },

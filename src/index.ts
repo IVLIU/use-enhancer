@@ -22,6 +22,7 @@ function useEnhancer<R extends Reducer<any, any>>(
   ...middlewares: TMiddleware[]
 ): Dispatch<ReducerState<R>>;
 function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
+  // const dispatchRef = useRef<typeof dispatch>();
   const callbackRef = useRef<typeof dispatch>();
   const storeRef = useRef<typeof store>();
   if (middlewares.length === 0) {

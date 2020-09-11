@@ -75,7 +75,25 @@ const App = () => {
       }, 1000));
       return ({ type: 'ASYNC_ACTION', payload: { value: 'async' } });
     })
-  }, [])
+    dispatch({
+      type: 'ANY_ACTION',
+    })
+    dispatch({
+      type: 'ANY_ACTION',
+    })
+    dispatch({
+      type: 'ANY_ACTION',
+    })
+    dispatch({
+      type: 'ANY_ACTION',
+    })
+    dispatch({
+      type: 'ANY_ACTION',
+    })
+    dispatch({
+      type: 'ANY_ACTION',
+    })
+  }, []);
   return (
     <div>
       <h2>{state.count}</h2>
