@@ -1,16 +1,11 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import reduxThunk from 'redux-thunk';
+import createSagaMiddleware from 'redux-saga';
 import useEnhancer from '../.';
 
-const thunk = () => next => async action => {
-  if(!action || typeof action !== 'function') {
-    await next();
-    return;
-  }
-  action = await action();
-  await next(action);
-};
+const sagaMiddleware = createSagaMiddleware();
 
 const all = storeRef => next => async actions => {
   if (!actions || !Array.isArray(actions)) {
@@ -46,11 +41,16 @@ const reducer = (state, action) => {
   }
 };
 
+(reduxThunk as any).__REDUX__ = true;
+(sagaMiddleware as any).__REDUX__ = true;
+
 const App = () => {
   const [state, rawDispatch] = React.useReducer(reducer, { value: 'initial', count: 0, extra: 0 });
   const dispatch = useEnhancer(
     state, 
     rawDispatch, 
+    reduxThunk as any,
+    sagaMiddleware as any,
     () => next => async () => await next(),
     () => next => async () => await next(),
     (storeRef, dispatchRef) => next => async () => {
@@ -64,11 +64,11 @@ const App = () => {
         payload: { extra: 1 }
       } as any);
     },
-    thunk,
     () => next => async () => await next(),
     all,
   );
   React.useEffect(() => {
+    // sagaMiddleware.run(function* sagaFunction() {})
     dispatch(async () => {
       await new Promise(r => setTimeout(() => {
         r();
@@ -87,12 +87,12 @@ const App = () => {
         }
       })}>NORMAL</div>
       <div onClick={() => dispatch([
-        {
+        () => ({
           type: 'ALL1_ACTION',
           payload: {
             value: 'all1'
           }
-        },
+        }),
         {
           type: 'ALL2_ACTION',
           payload: {
@@ -100,11 +100,13 @@ const App = () => {
           }
         }
       ])}>ALL</div>
-      <div onClick={() => dispatch({
-        type: 'ADD_ACTION',
-        payload: {
-          count: state.count + 1,
-        }
+      <div onClick={() => dispatch(() => {
+        return ({
+          type: 'ADD_ACTION',
+          payload: {
+            count: state.count + 1,
+          }
+        });
       })}>ADD</div>
     </div>
   );

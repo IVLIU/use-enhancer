@@ -31,19 +31,37 @@ function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
   return (
     callbackRef.current ||
     (callbackRef.current = compose(
-      middlewares.map(_m => _m(storeRef, callbackRef)),
+      middlewares.map(_m => {
+        if (_m.__REDUX__) {
+          const middlewareApi = {
+            getState: () => storeRef.current,
+            dispatch,
+          };
+          return next => async action => {
+            action = await _m(middlewareApi)(() => null)(action);
+            if (action) {
+              await next(action);
+              return;
+            }
+            await next();
+          };
+        }
+        return _m(storeRef, callbackRef);
+      }),
       {
-        onTarget: effect => {
+        onCapture: () => null,
+        onTarget: effects => {
           batch(() => {
-            while (effect) {
-              const { action, next } = effect;
+            while (effects) {
+              const { action, next } = effects;
               if (isPlainObject(action)) {
                 dispatch(action);
               }
-              effect = next;
+              effects = next;
             }
           });
         },
+        onBubble: () => null,
       }
     )!.callback)
   );

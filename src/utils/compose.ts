@@ -2,7 +2,7 @@ import { check } from './check';
 import { TNext } from './type';
 
 type TCompose = (callbacks: TCallback[], options?: Partial<TOptions>) => TLink;
-type TCallback = (next: TNext) => TLinkCallback;
+type TCallback = ((next: TNext) => TLinkCallback) & { __REDUX__?: boolean };
 type TLinkCallback = (...args: any[]) => Promise<any>;
 type TResolve = (value?: unknown) => void;
 
@@ -25,7 +25,7 @@ type TEffect = {
 
 type TOptions = {
   onCapture: () => void;
-  onTarget: (effect: TEffect) => void;
+  onTarget: (effects: TEffect) => void;
   onBubble: () => void;
 };
 
