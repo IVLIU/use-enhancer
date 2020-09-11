@@ -50,7 +50,7 @@ const App = () => {
     state, 
     rawDispatch, 
     reduxThunk as any,
-    sagaMiddleware as any,
+    // sagaMiddleware as any,
     () => next => async () => await next(),
     () => next => async () => await next(),
     (storeRef, dispatchRef) => next => async () => {

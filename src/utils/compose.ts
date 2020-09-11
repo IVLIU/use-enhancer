@@ -40,6 +40,8 @@ export const compose: TCompose = (callbacks, options = {}) => {
   let isExecuting: boolean = false;
   let isDispatchWithoutAction: boolean = false;
   // let isAutoResolve: boolean = true;
+  const queueMicrotask: (callback: VoidFunction) => void | PromiseLike<void> =
+    window.queueMicrotask || (callback => Promise.resolve().then(callback));
   const setEffects: (action: any) => void = action => {
     if (!effects) {
       effects = currentEffect = {
@@ -76,18 +78,17 @@ export const compose: TCompose = (callbacks, options = {}) => {
     }
     try {
       isExecuting = true;
-      const { onTarget } = options;
-      if (onTarget) {
-        onTarget(effects);
-      }
-    } finally {
-      // todo 后期换为promise，兼容性有问题
-      queueMicrotask(() => {
-        isExecuting = false;
-        effects = null;
-        // todo to break the function and call it in effect.
-        // await new Promise(_r => head!.resolve = _r);
+      await queueMicrotask(() => {
+        const { onTarget } = options;
+        if (onTarget) {
+          onTarget(effects);
+        }
       });
+    } finally {
+      isExecuting = false;
+      effects = null;
+      // todo to break the function and call it in effect.
+      // await new Promise(_r => head!.resolve = _r);
     }
   };
   for (let _c of callbacks) {
