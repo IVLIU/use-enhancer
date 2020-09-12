@@ -1,131 +1,89 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import reduxThunk from 'redux-thunk';
-import createSagaMiddleware from 'redux-saga';
-import useEnhancer from '../.';
+import useEnhancer, { thunk, all } from '../.';
+import './index.less';
 
-const sagaMiddleware = createSagaMiddleware();
-
-const all = storeRef => next => async actions => {
-  if (!actions || !Array.isArray(actions)) {
-    await next();
-    return;
-  }
-  actions = await Promise.all(
-    actions.reduce<Promise<typeof actions[0]>[]>((prev, current) => {
-      if (typeof current === 'function') {
-        return [...prev, current(storeRef.current)];
-      }
-      return [...prev, Promise.resolve(current)];
-    }, [])
-  );
-  await next(...actions);
+type TState = {
+  count: number;
+  txt1: string;
+  txt2: string;
+  txt3: string;
+  iVal: string;
+  sVal: string;
 }
 
-const reducer = (state, action) => {
+const reducer: React.Reducer<TState, { type: string, payload: { [key: string]: any } }> = (state, action) => {
   const { type, payload } = action;
   switch(type) {
-    case 'ASYNC_ACTION':
-    case 'NORMAL_ACTION':
-    case 'ALL1_ACTION':
-    case 'ALL2_ACTION':
-    case 'ADD_ACTION':
-    case 'EXTRA_ACTION':
+    case 'ADD_COUNT':
+    case 'FETCH_ONE':
+    case 'FETCH_TWO':
+    case 'FETCH_THERE':
+    case 'CHANGE_VALUE':
+    case 'GET_STOREGE':
       return {
         ...state,
         ...payload,
-      };
+      }
     default: 
       return state;
   }
 };
 
-(reduxThunk as any).__REDUX__ = true;
-(sagaMiddleware as any).__REDUX__ = true;
-
 const App = () => {
-  const [state, rawDispatch] = React.useReducer(reducer, { value: 'initial', count: 0, extra: 0 });
+  const [state, rawDispatch] = React.useReducer(
+    reducer, 
+    { count: 0, txt1: '', txt2: '', txt3: '', iVal: '', sVal: '' },
+  );
   const dispatch = useEnhancer(
     state, 
     rawDispatch, 
-    reduxThunk as any,
-    // sagaMiddleware as any,
-    () => next => async () => await next(),
-    () => next => async () => await next(),
-    (storeRef, dispatchRef) => next => async () => {
-      await next();
-      if(storeRef.current.extra !== 0) {
-        return;
-      }
-      // 我不知道为啥，但是需要as any下，否则会报类型不匹配的错误
-      dispatchRef.current({
-        type: 'EXTRA_ACTION',
-        payload: { extra: 1 }
-      } as any);
-    },
-    () => next => async () => await next(),
     all,
+    () => next => async () => await next(),
+    thunk,
   );
   React.useEffect(() => {
-    // sagaMiddleware.run(function* sagaFunction() {})
+    dispatch([
+      {
+        type: 'GET_STOREGE',
+        payload: {
+          sVal: 'storage value',
+        }
+      },
+      async () => {
+        await new Promise(r => setTimeout(() => r(), 1000))
+        return { type: 'FETCH_ONE', payload: { txt1: 'fetch-one success!!!' } }
+      },
+      async () => {
+        await new Promise(r => setTimeout(() => r(), 2000))
+        return { type: 'FETCH_TWO', payload: { txt2: 'fetch-two success!!!' } }
+      }
+    ])
     dispatch(async () => {
-      await new Promise(r => setTimeout(() => {
-        r();
-      }, 1000));
-      return ({ type: 'ASYNC_ACTION', payload: { value: 'async' } });
-    })
-    dispatch({
-      type: 'ANY_ACTION',
-    })
-    dispatch({
-      type: 'ANY_ACTION',
-    })
-    dispatch({
-      type: 'ANY_ACTION',
-    })
-    dispatch({
-      type: 'ANY_ACTION',
-    })
-    dispatch({
-      type: 'ANY_ACTION',
-    })
-    dispatch({
-      type: 'ANY_ACTION',
+      await new Promise(r => setTimeout(() => r(), 1000))
+      return { type: 'FETCH_THERE', payload: { txt3: 'fetch-there success!!!' } }
     })
   }, []);
   return (
-    <div>
-      <h2>{state.count}</h2>
-      <h2>{state.value}</h2>
-      <div onClick={() => dispatch({
-        type: 'NORMAL_ACTION',
+    <div className="e-wrapper">
+      <h2>The count is {state.count}</h2>
+      <div className="e-button" onClick={() => dispatch(store => ({
+        type: 'ADD_COUNT',
         payload: {
-          value: 'normal'
+          count: store.count + 1,
         }
-      })}>NORMAL</div>
-      <div onClick={() => dispatch([
-        () => ({
-          type: 'ALL1_ACTION',
-          payload: {
-            value: 'all1'
-          }
-        }),
-        {
-          type: 'ALL2_ACTION',
-          payload: {
-            value: 'all2'
-          }
+      }))}>ADD ONE</div>
+      <p>{state.txt1 || 'loading...'}</p>
+      <p>{state.txt2 || 'loading...'}</p>
+      <p>{state.txt3 || 'loading...'}</p>
+      <p>{state.sVal || 'loading...'}</p>
+      <input type="text" value={state.iVal} onChange={e => dispatch({
+        type: 'CHANGE_VALUE',
+        payload: {
+          iVal: e.target.value,
         }
-      ])}>ALL</div>
-      <div onClick={() => dispatch(() => {
-        return ({
-          type: 'ADD_ACTION',
-          payload: {
-            count: state.count + 1,
-          }
-        });
-      })}>ADD</div>
+      })} />
     </div>
   );
 };
