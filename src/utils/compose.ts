@@ -1,4 +1,7 @@
 import { check } from './check';
+import { isPromise } from './isPromise';
+import { isAsyncFunction } from './isAsyncFunction';
+import { queneMicroTask } from './queneMicroTask';
 import { TNext } from './type';
 
 type TCompose = (callbacks: TCallback[], options?: Partial<TOptions>) => TLink;
@@ -18,7 +21,10 @@ type TAction = {
   payload: any;
 } | null;
 
+type TTag = 1 | 2 | 3; /** 1 plainObject 2 promise 3 asyncFunction */
+
 type TEffect = {
+  tag: TTag;
   action: TAction;
   next: TEffect | null;
 } | null;
@@ -40,20 +46,26 @@ export const compose: TCompose = (callbacks, options = {}) => {
   let isExecuting: boolean = false;
   let isDispatchWithoutAction: boolean = false;
   // let isAutoResolve: boolean = true;
-  const queueMicrotask: (callback: VoidFunction) => void | PromiseLike<void> =
-    window.queueMicrotask || (callback => Promise.resolve().then(callback));
-  const setEffects: (action: any) => void = action => {
-    if (!effects) {
-      effects = currentEffect = {
-        action,
-        next: null,
-      };
-      return;
+  const createEffect: (action: TAction) => TEffect = action => {
+    let tag: TTag = 1;
+    if (isPromise(action)) {
+      tag = 2;
     }
-    currentEffect = currentEffect!.next = {
+    if (isAsyncFunction(action)) {
+      tag = 3;
+    }
+    return {
+      tag,
       action,
       next: null,
     };
+  };
+  const setEffects: (action: any) => void = action => {
+    if (!effects) {
+      effects = currentEffect = createEffect(action);
+      return;
+    }
+    currentEffect = currentEffect!.next = createEffect(action);
   };
   const next: TNext = async (...derivedActions) => {
     if (isExecuting) {
@@ -78,7 +90,7 @@ export const compose: TCompose = (callbacks, options = {}) => {
     }
     try {
       isExecuting = true;
-      await queueMicrotask(() => {
+      await queneMicroTask(() => {
         const { onTarget } = options;
         if (onTarget) {
           onTarget(effects);
