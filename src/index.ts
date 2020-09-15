@@ -8,7 +8,7 @@ import {
   useRef,
 } from 'react';
 import { unstable_batchedUpdates as batch } from 'react-dom';
-import { compose, isPlainObject } from './utils';
+import { compose, isPlainObject, schedule } from './utils';
 import { TMiddlewareWithoutAction, TMiddleware } from './type';
 
 function useEnhancer<R extends ReducerWithoutAction<any>>(
@@ -53,13 +53,15 @@ function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
         onCapture: () => null,
         onTarget: effects => {
           batch(() => {
-            while (effects) {
-              const { action, next } = effects;
-              if (isPlainObject(action)) {
-                dispatch(action);
+            schedule(effects, effect => {
+              while (effect) {
+                const { action, next } = effect;
+                if (isPlainObject(action)) {
+                  dispatch(action);
+                }
+                effect = next;
               }
-              effects = next;
-            }
+            });
           });
         },
         onBubble: () => null,

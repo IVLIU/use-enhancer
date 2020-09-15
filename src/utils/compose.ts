@@ -2,7 +2,7 @@ import { check } from './check';
 import { isPromise } from './isPromise';
 import { isAsyncFunction } from './isAsyncFunction';
 import { queneMicroTask } from './queneMicroTask';
-import { TNext } from './type';
+import { TTag, TAction, TEffect, TNext } from './type';
 
 type TCompose = (callbacks: TCallback[], options?: Partial<TOptions>) => TLink;
 type TCallback = ((next: TNext) => TLinkCallback) & { __REDUX__?: boolean };
@@ -14,19 +14,6 @@ type TLink = {
   resolve: TResolve | null;
   prev: TLink;
   next: TLink;
-} | null;
-
-type TAction = {
-  type: string;
-  payload: any;
-} | null;
-
-type TTag = 1 | 2 | 3; /** 1 plainObject 2 promise 3 asyncFunction */
-
-type TEffect = {
-  tag: TTag;
-  action: TAction;
-  next: TEffect | null;
 } | null;
 
 type TOptions = {
