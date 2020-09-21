@@ -39,45 +39,31 @@ const App = () => {
   const dispatch = useEnhancer(
     state, 
     rawDispatch, 
-    all,
-    () => next => async () => await next(),
+    // all,
+    // () => next => async () => await next(),
     thunk,
   );
   React.useEffect(() => {
-    dispatch([
-      {
-        type: 'GET_STOREGE',
-        payload: {
-          sVal: 'storage value',
-        }
-      },
-      async () => {
-        await new Promise(r => setTimeout(() => r(), 1000))
-        return { type: 'FETCH_ONE', payload: { txt1: 'fetch-one success!!!' } }
-      },
-      async () => {
-        await new Promise(r => setTimeout(() => r(), 2000))
-        return { type: 'FETCH_TWO', payload: { txt2: 'fetch-two success!!!' } }
-      }
-    ])
+    dispatch({ type: 'NORMAL_TYPE', payload: {} });
+    dispatch(new Promise(r => r({ type: 'PROMISE_TYPE', payload: {} })));
     dispatch(async () => {
       await new Promise(r => setTimeout(() => r(), 1000))
       return { type: 'FETCH_THERE', payload: { txt3: 'fetch-there success!!!' } }
-    })
+    });
   }, []);
   return (
     <div className="e-wrapper">
-      <h2>The count is {state.count}</h2>
+      {/* <h2>The count is {state.count}</h2>
       <div className="e-button" onClick={() => dispatch(store => ({
         type: 'ADD_COUNT',
         payload: {
           count: store.count + 1,
         }
-      }))}>ADD ONE</div>
-      <p>{state.txt1 || 'loading...'}</p>
+      }))}>ADD ONE</div> */}
+      {/* <p>{state.txt1 || 'loading...'}</p>
       <p>{state.txt2 || 'loading...'}</p>
       <p>{state.txt3 || 'loading...'}</p>
-      <p>{state.sVal || 'loading...'}</p>
+      <p>{state.sVal || 'loading...'}</p> */}
       <input type="text" value={state.iVal} onChange={e => dispatch({
         type: 'CHANGE_VALUE',
         payload: {

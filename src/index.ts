@@ -7,8 +7,7 @@ import {
   Dispatch,
   useRef,
 } from 'react';
-import { unstable_batchedUpdates as batch } from 'react-dom';
-import { compose, isPlainObject, schedule } from './utils';
+import { createQueneUpdater, compose } from './utils';
 import { TMiddlewareWithoutAction, TMiddleware } from './type';
 
 function useEnhancer<R extends ReducerWithoutAction<any>>(
@@ -22,51 +21,19 @@ function useEnhancer<R extends Reducer<any, any>>(
   ...middlewares: TMiddleware[]
 ): Dispatch<ReducerState<R>>;
 function useEnhancer(store: any, dispatch: any, ...middlewares: any[]): any {
-  // const dispatchRef = useRef<typeof dispatch>();
-  const callbackRef = useRef<typeof dispatch>();
   const storeRef = useRef<typeof store>();
-  if (middlewares.length === 0) {
-    return callbackRef.current || (callbackRef.current = dispatch);
-  }
+  const queneUpdateRef = useRef<ReturnType<typeof createQueneUpdater>>();
   storeRef.current = store;
   return (
-    callbackRef.current ||
-    (callbackRef.current = compose(
-      middlewares.map(_m => {
-        if (_m.__REDUX__) {
-          const middlewareApi = {
-            getState: () => storeRef.current,
-            dispatch,
-          };
-          return next => async action => {
-            action = await _m(middlewareApi)(() => null)(action);
-            if (action) {
-              await next(action);
-              return;
-            }
-            await next();
-          };
-        }
-        return _m(storeRef, callbackRef);
-      }),
-      {
-        onCapture: () => null,
-        onTarget: effects => {
-          batch(() => {
-            schedule(effects, effect => {
-              while (effect) {
-                const { action, next } = effect;
-                if (isPlainObject(action)) {
-                  dispatch(action);
-                }
-                effect = next;
-              }
-            });
-          });
-        },
-        onBubble: () => null,
-      }
-    )!.callback)
+    queneUpdateRef.current ||
+    (queneUpdateRef.current = createQueneUpdater(
+      dispatch,
+      compose(
+        middlewares.map(_m => {
+          return _m(storeRef, dispatch);
+        })
+      )
+    ))
   );
 }
 

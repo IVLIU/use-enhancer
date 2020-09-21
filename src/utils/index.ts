@@ -6,7 +6,7 @@ export { isPromise } from './isPromise';
 export { queneMacroTask } from './queneMacroTask';
 export { queneMicroTask } from './queneMicroTask';
 export { schedule } from './schedule';
-export { queneUpdate } from './queneUpdate';
+export { createQueneUpdater } from './createQueneUpdater';
 export { createUpdate } from './createUpdate';
 export { isSupportProxy } from './isSupportProxy';
 export { isSupportSymbol } from './isSupportSymbol';

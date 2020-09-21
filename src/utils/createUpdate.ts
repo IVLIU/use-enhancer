@@ -4,10 +4,10 @@ import { TTag, TUpdate } from './type';
 
 export const createUpdate: (action: any) => TUpdate = action => {
   let tag: TTag = 1;
-  if (isPromise({})) {
+  if (isPromise(action)) {
     tag = 2;
   }
-  if (isAsyncFunction({})) {
+  if (isAsyncFunction(action)) {
     tag = 3;
   }
   return {
