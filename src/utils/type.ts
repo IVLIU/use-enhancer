@@ -15,10 +15,8 @@ export type TAction =
 
 export type TTag = 1 | 2 | 3; /** 1 plainObject 2 promise 3 asyncFunction */
 
-export type TEffect = {
+export type TUpdate = {
   tag: TTag;
   action: TAction;
-  next: TEffect | null;
+  next: TUpdate | null;
 } | null;
-
-export type TUpdate = TEffect;

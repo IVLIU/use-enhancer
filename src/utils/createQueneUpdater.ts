@@ -10,11 +10,14 @@ type TCreateQueneUpdater = (
 let updateQuene: TUpdate = null;
 let currentUpdate: TUpdate = null;
 
-export const createQueneUpdater: TCreateQueneUpdater = dispatch => action => {
+export const createQueneUpdater: TCreateQueneUpdater = (
+  dispatch,
+  enhancer
+) => action => {
   if (!updateQuene) {
     updateQuene = currentUpdate = createUpdate(action);
   } else {
     currentUpdate = currentUpdate!.next = createUpdate(action);
   }
-  schedule(dispatch)(updateQuene);
+  schedule(dispatch, enhancer)(updateQuene);
 };
