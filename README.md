@@ -72,9 +72,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 ## 例子
 
 请参照example
-
-## Gitlab
-
-https://code.ii-ai.tech/ued/use-enhancer
-
-没有权限请联系流川
