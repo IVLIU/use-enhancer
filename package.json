@@ -1,0 +1,64 @@
+{
+  "version": "1.0.3",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish"
+  },
+  "peerDependencies": {
+    "react": ">=16.8"
+  },
+  "lint-staged": {
+    "**/*.ts?(x)": [
+      "npx prettier --parser=typescript --fix --write"
+    ]
+  },
+  "name": "@ai-indeed/use-enhancer",
+  "author": "liuchuan",
+  "module": "dist/use-enhancer.esm.js",
+  "publishConfig": {
+    "registry": "http://10.4.2.21:8081/repository/npm-hosted/"
+  },
+  "size-limit": [
+    {
+      "path": "dist/use-enhancer.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/use-enhancer.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^16.3.0",
+    "@commitlint/config-conventional": "^16.2.4",
+    "@size-limit/preset-small-lib": "^7.0.8",
+    "@types/react": "^18.0.8",
+    "@types/react-dom": "^18.0.3",
+    "husky": "^8.0.1",
+    "lint-staged": "^12.4.1",
+    "prettier": "^2.7.1",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "size-limit": "^7.0.8",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4"
+  }
+}
